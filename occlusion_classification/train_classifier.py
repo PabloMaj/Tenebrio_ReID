@@ -315,7 +315,8 @@ if __name__ == "__main__":
 
                 print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, loss.item()))
 
-                print("epoch\tsubset_name\tF1_max\tprecision\trecall\tAUCPR\tAUCROC")
+                print("epoch\tsubset_name\tF1\tprecision\trecall\tAUCPR\tAUCROC\tthresh")
+                thresh_opt = None
                 for subset_name, eval_dataloader in [("val", val_dataloader), ("test", test_dataloader)]:
 
                     predictions_list = []
@@ -336,15 +337,19 @@ if __name__ == "__main__":
                     # print(labels_list)
                     # print(predictions_list)
 
-                    thresh_values = list(np.arange(0, 1, 0.001))
-                    F1_values = []
-                    for thresh in thresh_values:
-                        predictions_list = [score > thresh for score in scores_list]
-                        F1 = round(f1_score(y_true=labels_list, y_pred=predictions_list), 3)
-                        F1_values.append(F1)
-                    F1_max = np.max(F1_values)
-                    thresh_opt = thresh_values[np.argmax(F1_values)]
+                    if subset_name == "val":
+                        # pick the decision threshold on val only; test reuses it below so
+                        # the reported test metrics aren't tuned on the test set itself
+                        thresh_values = list(np.arange(0, 1, 0.001))
+                        F1_values = []
+                        for thresh in thresh_values:
+                            predictions_list = [score > thresh for score in scores_list]
+                            F1 = round(f1_score(y_true=labels_list, y_pred=predictions_list), 3)
+                            F1_values.append(F1)
+                        thresh_opt = thresh_values[np.argmax(F1_values)]
+
                     predictions_list = [score > thresh_opt for score in scores_list]
+                    F1 = round(f1_score(y_true=labels_list, y_pred=predictions_list), 3)
 
                     precision = round(precision_score(y_true=labels_list, y_pred=predictions_list), 3)
                     recall = round(recall_score(y_true=labels_list, y_pred=predictions_list), 3)
@@ -352,10 +357,12 @@ if __name__ == "__main__":
                     AUCPR = round(average_precision_score(y_true=labels_list, y_score=scores_list), 3)
                     AUCROC = round(roc_auc_score(y_true=labels_list, y_score=scores_list), 3)
 
-                    print(f"{epoch}\t{subset_name}\t{F1_max}\t{precision}\t{recall}\t{AUCPR}\t{AUCROC}")
+                    print(f"{epoch}\t{subset_name}\t{F1}\t{precision}\t{recall}\t{AUCPR}\t{AUCROC}\t{thresh_opt}")
 
-                    if F1_max > 0.8 and subset_name == "val":
+                    if F1 > 0.8 and subset_name == "val":
                         torch.save(model.state_dict(), "example_model_occlusion_classification.pt")
+                        with open("example_model_occlusion_classification_threshold.txt", "w") as f:
+                            f.write(str(thresh_opt))
                         print("Problematic samples")
                         for i, path_ in enumerate(image_val_paths):
                             img_name = os.path.basename(path_)
