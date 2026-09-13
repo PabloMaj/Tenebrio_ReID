@@ -1,0 +1,25 @@
+# Python environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Datasets (including datasets/additional/) are hosted on Mendeley Data, not in this
+# repo (see datasets/DATASETS_README.md and the "Dataset" section of the top-level
+# README for the download link and where to extract it).
+datasets/
+
+# Regenerable pipeline outputs (see each module's README to reproduce)
+mobility_index/outputs/
+mating_index/outputs/
+mating_index/models/
+mating_index/datasets/holdout_*
+mating_index/*.pt
+reid_benchmark/runs*/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+
+# Results folders
+re_identification/results/*
