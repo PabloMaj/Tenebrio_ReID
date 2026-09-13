@@ -23,3 +23,6 @@ Thumbs.db
 
 # Results folders
 re_identification/results/*
+segmentation_head_thorax/runs/*
+segmentation_head_thorax/weights/*
+segmentation_head_thorax/*.pt
