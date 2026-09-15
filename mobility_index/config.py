@@ -119,7 +119,7 @@ class MobilityConfig:
 
     # ---- physical units ---------------------------------------------- #
     seconds_per_frame: float = 5.0      # time between two consecutive frames [s]
-    k_mm_per_px: float = 0.0943         # spatial scale [mm / px]
+    k_mm_per_px: float = 0.0755         # spatial scale [mm / px]
 
     # ---- aggregation ------------------------------------------------- #
     #: allowed abdomen displacement between *consecutive frames* (px); a step
